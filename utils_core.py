@@ -141,15 +141,14 @@ def write_temp_file(data: bytes, preferred_name: str = "output", ext: str = ".bi
 
 _PREVIEW_WIDGET_COUNTER = 0
 
+_PREVIEW_WIDGET_COUNTER = 0
+
 
 def preview_file_streamlit(st, path: str, title: str = "Preview", *, key_suffix: str = "") -> None:
     """Preview a file with a collision-safe Streamlit widget key.
 
-    Text previews use `st.text_area`, which requires a globally unique key.
-    In this app the same text file can appear in Panel 5 and Panel 6, and the
-    same helper can also be called inside both No-ECC and ECC tabs.  A stable
-    hash alone can collide when the same path/title/context is rendered twice,
-    so we include a per-rerun counter in the key.
+    Text previews use st.text_area, which requires a globally unique key.
+    The same file can appear in different panels/tabs, so a hash alone is not enough.
     """
     global _PREVIEW_WIDGET_COUNTER
     _PREVIEW_WIDGET_COUNTER += 1
@@ -158,17 +157,28 @@ def preview_file_streamlit(st, path: str, title: str = "Preview", *, key_suffix:
     if not path or not os.path.exists(path):
         st.info("Preview is not available.")
         return
+
     data = Path(path).read_bytes()
     ext = Path(path).suffix.lower()
+
     key_base = f"{path}|{title}|{key_suffix}|{len(data)}|{_PREVIEW_WIDGET_COUNTER}"
-    preview_key = "preview_" + hashlib.sha1(key_base.encode("utf-8", errors="ignore")).hexdigest()[:16]
+    preview_key = "preview_" + hashlib.sha1(
+        key_base.encode("utf-8", errors="ignore")
+    ).hexdigest()[:16]
+
     try:
         if ext in IMAGE_EXTENSIONS:
             st.image(path, width=260)
         elif ext == ".wav" or ext in AUDIO_EXTENSIONS:
             st.audio(path)
         elif ext in TEXT_EXTENSIONS or _can_decode_as_text(data):
-            st.text_area("Text preview", bytes_to_preview_text(data, 20000), height=260, label_visibility="collapsed", key=preview_key)
+            st.text_area(
+                "Text preview",
+                bytes_to_preview_text(data, 20000),
+                height=260,
+                label_visibility="collapsed",
+                key=preview_key,
+            )
         else:
             st.info("Preview is not available for this file type.")
     except Exception as exc:
