@@ -1027,7 +1027,7 @@ def render_app_body() -> None:
     st.markdown(
         """
 <div class="hero-card">
-  <div class="hero-title"><br/>🧬 DNA Data Storage System</div>
+  <div class="hero-title"><br/>🧬 DNA Data Storage System (Raw data)</div>
    
 </div>
 """,
