@@ -5,7 +5,7 @@ import hashlib
 import io
 import json
 from pathlib import Path
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Tuple
 
 import pandas as pd
 import streamlit as st
@@ -124,6 +124,20 @@ def _set_pipeline_context(prefix: str, ecc_enabled: bool) -> None:
 def _key(name: str) -> str:
     return f"raw_app_{ACTIVE_PREFIX}_{name}"
 
+def _content_key(name: str, value: Any) -> str:
+    """Return a widget key that changes when preview content changes.
+
+    Streamlit keeps text_area contents by widget key. If the key is fixed,
+    changing SM ↔ R∞ can update metrics while the Base string text_area still
+    shows the previous DNA preview. Including a content hash forces refresh.
+    """
+    if isinstance(value, bytes):
+        raw = value
+    else:
+        raw = str(value or "").encode("utf-8", errors="ignore")
+
+    digest = hashlib.sha1(raw).hexdigest()[:12]
+    return f"{_key(name)}_{digest}"
 
 def step_header(number: int, title: str) -> None:
     st.markdown(
@@ -528,7 +542,7 @@ def render_panel_1_input() -> None:
             preview_file_streamlit(st, path, "Original preview", key_suffix="input")
             with st.expander("Original binary", expanded=False):
                 bit_text = bytes_to_bitstring(data)
-                st.text_area("Binary bitstream", bit_text[:3000] + ("..." if len(bit_text) > 3000 else ""), height=120, key=_key("input_bits_preview"))
+                st.text_area("Binary bitstream", bit_text[:3000] + ("..." if len(bit_text) > 3000 else ""), height=120, key=_content_key("input_bits_preview", bit_text))
                 _download_text_button("Download input binary", bit_text, "input_binary.txt", key=_key("download_input_binary"))
 
 
@@ -683,7 +697,7 @@ def render_panel_3_dna_encoding() -> None:
                 {"Property": "RS blocks", "Value": ecc_meta.get("blocks", "—")},
                 {"Property": "Max unknown byte errors/block", "Value": ecc_meta.get("max_unknown_byte_errors_per_block", "—")},
             ]), use_container_width=True, hide_index=True)
-        st.text_area("Base string", _preview_seq(dna, 900), height=150, key=_key("dna_preview"))
+        st.text_area("Base string", _preview_seq(dna, 900), height=150, key=_content_key("dna_preview", dna))
         d1, d2 = st.columns(2)
         with d1:
             _download_text_button("Download encoded DNA", dna, "encoded_dna.txt", key=_key("download_encoded_dna"))
