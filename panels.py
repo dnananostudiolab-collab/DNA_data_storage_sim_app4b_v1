@@ -605,7 +605,23 @@ def render_panel_2_raw_representation() -> None:
         #     _download_bytes_button("Download raw bytes", raw_bytes, "raw_representation.bin", key=_key("download_raw_bytes"))
         # with d2:
         #     _download_text_button("Download raw metadata", json.dumps(raw_meta, indent=2), "raw_metadata.json", key=_key("download_raw_meta"))
-        stored_bits = bytes_to_bitstring(stored)
+        raw_bytes = st.session_state.get(_key("raw_bytes"), b"") or b""
+
+        if raw_bytes:
+            raw_bits = bytes_to_bitstring(raw_bytes)
+        
+            st.markdown("#### Prepared payload preview")
+            st.caption("Binary payload generated from the raw representation and passed to the SM/R∞ DNA design step.")
+        
+            st.text_area(
+                "Prepared binary payload",
+                raw_bits[:5000] + ("..." if len(raw_bits) > 5000 else ""),
+                height=220,
+                key=_content_key("raw_binary_preview", raw_bits),
+            )
+        else:
+            st.info("Run Raw Representation first.")
+        stored_bits = bytes_to_bitstring(raw_bytes)
         
         st.markdown("#### Prepared payload preview")
         st.caption("Binary payload that will be passed to the SM/R∞ DNA design step.")
