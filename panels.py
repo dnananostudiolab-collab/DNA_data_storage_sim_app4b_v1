@@ -599,13 +599,41 @@ def render_panel_2_raw_representation() -> None:
             return
         _metrics_row([("Raw domain", raw_meta.get("domain", "—")), ("Representation", raw_meta.get("representation", "—")), ("Raw size", fmt_bytes(len(raw_bytes))), ("Expansion vs container", f"{len(raw_bytes) / max(1, len(data)):.2f}×")])
         st.dataframe(pd.DataFrame(raw_meta_summary(raw_meta)), use_container_width=True, hide_index=True)
-        preview_file_streamlit(st, preview_path, "Raw representation preview", key_suffix="raw")
+        # preview_file_streamlit(st, preview_path, "Raw representation preview", key_suffix="raw")
+        # d1, d2 = st.columns(2)
+        # with d1:
+        #     _download_bytes_button("Download raw bytes", raw_bytes, "raw_representation.bin", key=_key("download_raw_bytes"))
+        # with d2:
+        #     _download_text_button("Download raw metadata", json.dumps(raw_meta, indent=2), "raw_metadata.json", key=_key("download_raw_meta"))
+        stored_bits = bytes_to_bitstring(stored)
+        
+        st.markdown("#### Prepared payload preview")
+        st.caption("Binary payload that will be passed to the SM/R∞ DNA design step.")
+        
+        st.text_area(
+            "Prepared binary payload",
+            stored_bits[:5000] + ("..." if len(stored_bits) > 5000 else ""),
+            height=220,
+            key=_content_key(prefix, "stored_binary_preview", stored_bits),
+        )
+        
         d1, d2 = st.columns(2)
+        
         with d1:
-            _download_bytes_button("Download raw bytes", raw_bytes, "raw_representation.bin", key=_key("download_raw_bytes"))
+            _download_bytes_button(
+                BUTTONS["download_stored_data"],
+                stored,
+                f"stored_data{md.get('ext', '.bin')}",
+                key=_key(prefix, "download_stored_data"),
+            )
+        
         with d2:
-            _download_text_button("Download raw metadata", json.dumps(raw_meta, indent=2), "raw_metadata.json", key=_key("download_raw_meta"))
-
+            _download_text_button(
+                BUTTONS["download_stored_binary"],
+                stored_bits,
+                "stored_binary.txt",
+                key=_key(prefix, "download_stored_binary"),
+            )
 
 def render_panel_3_dna_encoding() -> None:
     with st.container(border=True):
@@ -1027,13 +1055,13 @@ def render_app_body() -> None:
     st.markdown(
         """
 <div class="hero-card">
-  <div class="hero-title"><br/>🧬 DNA Data Storage System (Raw data)</div>
-   
+  <div class="hero-title"><br/>🧬 DNA Error Simulation and Reed–Solomon ECC Recovery Pipeline</div>
+   <div class="hero-subtitle">Mode: Raw Representation Storage</div>
 </div>
 """,
         unsafe_allow_html=True,
     )
-    tab1, tab2 = st.tabs(["No Error Correction Code", "Error Correction Code"])
+    tab1, tab2 = st.tabs(["No ECC — Raw Representation", "RS-ECC Recovery — Raw Representation"])
     with tab1:
         render_pipeline(prefix="noecc", ecc_enabled=False)
     with tab2:
