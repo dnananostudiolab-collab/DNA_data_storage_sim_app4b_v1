@@ -6,7 +6,7 @@ from panels import apply_app_style, render_app_body
 
 
 def render_app() -> None:
-    st.set_page_config(page_title="Raw Representation DNA Storage", page_icon="🧬", layout="wide")
+    st.set_page_config(page_title="DNA Error Simulation and Reed–Solomon ECC Recovery Pipeline", page_icon="🧬", layout="wide")
     apply_app_style()
     render_app_body()
 
