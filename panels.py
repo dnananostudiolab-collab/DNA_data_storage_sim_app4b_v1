@@ -1071,13 +1071,13 @@ def render_app_body() -> None:
     st.markdown(
         """
 <div class="hero-card">
-  <div class="hero-title"><br/>🧬 DNA Error Simulation and Reed–Solomon ECC Recovery Pipeline</div>
-   <div class="hero-subtitle">Mode: Raw Representation Storage</div>
+  <div class="hero-title"><br/>🧬 Openable Error data</div>
+   <div class="hero-subtitle">🧬 DNA Error Simulation and ECC Recovery Pipeline</div>
 </div>
 """,
         unsafe_allow_html=True,
     )
-    tab1, tab2 = st.tabs(["No ECC — Raw Representation", "RS-ECC Recovery — Raw Representation"])
+    tab1, tab2 = st.tabs(["No ECC — Raw Representation", "ECC Recovery — Raw Representation"])
     with tab1:
         render_pipeline(prefix="noecc", ecc_enabled=False)
     with tab2:
